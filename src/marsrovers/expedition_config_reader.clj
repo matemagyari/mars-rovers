@@ -39,7 +39,8 @@
 
 (defn expedition-config
   "Return the config for the expedition."
-  []
-  (let [plateau-config {:x 300 :y 300}]
+  [rover-number]
+  (let [plateau-config {:x 300 :y 300}
+        rover-number (if rover-number rover-number 10)]
     {:plateau-config plateau-config
-     :rover-configs (rand-rover-configs 100 plateau-config)}))
+     :rover-configs (rand-rover-configs rover-number plateau-config)}))

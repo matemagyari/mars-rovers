@@ -16,25 +16,25 @@
 ;; -----------------  private functions ------------------------
 (defn- start-controller!
   "Starts up a mars rover controller"
-  [controller-atom]
+  [controller-init-state]
   (glue/start-component!
-    controller-atom
+    controller-init-state
     (fn [state in-msg]
       (c/receive state in-msg))))
 
 (defn- start-nasa-hq!
   "Starts up the NASA HQ"
-  [hq-atom]
+  [hq-init-state]
   (glue/start-component!
-    hq-atom
+    hq-init-state
     (fn [state in-msg]
       (n/receive state in-msg start-controller!))))
 
 (defn- start-plateau!
   "Starts up the Plateau"
-  [plateau-atom]
+  [plateau-init-state]
   (glue/start-component!
-    plateau-atom
+    plateau-init-state
     (fn [state in-msg]
       (p/receive state in-msg))))
 
@@ -51,32 +51,29 @@
   "Starts up the world the rovers will roam"
   [expedition-config plateau-channel nasa-hq-channel displayer-channel dim-screen]
   (let [plateau-config (:plateau-config expedition-config)
-        plateau-atom (atom
-                       (p/plateau plateau-config plateau-channel displayer-channel))
-        nasa-hq-atom (atom
-                       (n/nasa-hq nasa-hq-channel))]
-    (start-nasa-hq! nasa-hq-atom)
-    (start-plateau! plateau-atom)
+        plateau-init-state (p/plateau plateau-config plateau-channel displayer-channel)
+        nasa-hq-init-state (n/nasa-hq nasa-hq-channel)]
+    (start-nasa-hq! nasa-hq-init-state)
+    (start-plateau! plateau-init-state)
     (start-displayer! displayer-channel plateau-config dim-screen)))
 
 (defn start-rover!
   "Starts up a single rover"
-  [rover-atom plateau-channel mediator-channel]
+  [rover-init-state plateau-channel mediator-channel]
   (glue/start-component!
-    rover-atom
+    rover-init-state
     (fn [rover-state in-msg]
       (r/receive rover-state in-msg plateau-channel mediator-channel)))
-  (glue/send-msg! (u/msg (:in-channel @rover-atom) (ra/tick-msg (:id @rover-atom)))))
+  (glue/send-msg! (u/msg (:in-channel rover-init-state) (ra/tick-msg (:id rover-init-state)))))
 
 
 (defn start-rovers!
   "Starts up a bunch of rovers"
   [rover-configs plateau-channel mediator-channel]
-  (let [rover-atoms (for [i (range (count rover-configs))]
-                      (atom
-                        (r/rover i (nth rover-configs i) (glue/chan))))
+  (let [rovers (for [i (range (count rover-configs))]
+                      (r/rover i (nth rover-configs i) (glue/chan)))
         rovers-monitor-watch (monitor/rovers-monitor)]
-    (doseq [rover-atom rover-atoms]
+    (doseq [rover rovers]
       ;(add-watch rover-atom :all-rovers rovers-monitor-watch)
-      (start-rover! rover-atom plateau-channel mediator-channel))))
+      (start-rover! rover plateau-channel mediator-channel))))
 

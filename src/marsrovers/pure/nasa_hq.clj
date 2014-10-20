@@ -11,8 +11,7 @@
 ;; -----------------  private functions ------------------------
 
 (defn- create-controller [hq in-msg]
-  (atom
-    (c/controller (:rover-id in-msg) (:rover-channel in-msg) (:rover-config in-msg) (glue/chan) (:in-channel hq))))
+  (c/controller (:rover-id in-msg) (:rover-channel in-msg) (:rover-config in-msg) (glue/chan) (:in-channel hq)))
 
 ;; -----------------  public functions ------------------------
 
@@ -24,7 +23,7 @@
 
     :register-rover (let [controller (create-controller hq in-msg)
                           msgs [(u/msg (:rover-channel in-msg) (hq/rover-registered-msg))
-                                (u/msg (:in-channel @controller) (ca/start-rover-msg))]]
+                                (u/msg (:in-channel controller) (ca/start-rover-msg))]]
                       {:effects [#(start-controller-fn! controller)]
                        :msgs msgs
                        :state hq})

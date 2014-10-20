@@ -11,11 +11,11 @@
   "state - reseting the atom to this state
    msgs - messages to send
    effects - effects to execute. These are functions with deliberate side-effect and nil return value"
-  [entity-atom {state :state
+  [component-atom {state :state
                 msgs :msgs
                 effects :effects}]
   (when state
-    (reset! entity-atom state))
+    (reset! component-atom state))
   (when effects
     (doseq [e! effects] (e!)))
   (when msgs
@@ -33,14 +33,16 @@
 
 (defn start-component!
   "Starts up a component. A component is composed of:
-   entity-atom - the atom holding the value of the component
-   msg-processing-fn - a function describing the component's behaviour"
-  [entity-atom msg-processing-fn]
-  (let [in-channel (:in-channel @entity-atom)
+   init-state - the init state
+   msg-processing-fn - a function describing the component's behaviour. Signature is (State,Message)->State"
+  [init-state msg-processing-fn]
+  {:pre [(some? init-state) (some? (:in-channel init-state))]}
+  (let [component-atom (atom init-state)
+        in-channel (:in-channel init-state)
         go-chan (a/go-loop []
                   (if-let [in-msg (a/<! in-channel)]
-                    (let [result (msg-processing-fn @entity-atom in-msg)]
-                      (process-result! entity-atom result)
+                    (let [result (msg-processing-fn @component-atom in-msg)]
+                      (process-result! component-atom result)
                       (recur))
                     (println "Channel closed")))]
     ;(println "Component started up")

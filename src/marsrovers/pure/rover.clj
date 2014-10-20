@@ -115,7 +115,7 @@
                      (:controller-channel rover) (position-msg-body rover))]})
 
     :poison-pill (do
-                   (rover-log! rover "I'm dead!")
+                   ;(rover-log! rover "I'm dead!")
                    {:state (assoc rover :state :dead)})
 
     (do

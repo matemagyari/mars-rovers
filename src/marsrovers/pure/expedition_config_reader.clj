@@ -20,7 +20,7 @@
     (r/rover-config
       (r/rover-position x y facing)
       (lot-of-actions action-number)
-      {:movement-speed 10 :turning-speed 10})))
+      {:movement-speed 0 :turning-speed 0})))
 
 (defn- rand-rover-configs [n action-number plateau-config]
   (->> #(rand-rover-config plateau-config action-number)

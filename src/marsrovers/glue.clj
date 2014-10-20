@@ -39,7 +39,7 @@
   (let [in-channel (:in-channel @entity-atom)
         go-chan (a/go-loop []
                   (if-let [in-msg (a/<! in-channel)]
-                    (let [result (msg-processing-fn in-msg)]
+                    (let [result (msg-processing-fn @entity-atom in-msg)]
                       (process-result! entity-atom result)
                       (recur))
                     (println "Channel closed")))]

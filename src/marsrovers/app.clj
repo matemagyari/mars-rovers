@@ -19,24 +19,24 @@
   [controller-atom]
   (glue/start-component!
     controller-atom
-    (fn [in-msg]
-      (c/receive @controller-atom in-msg))))
+    (fn [state in-msg]
+      (c/receive state in-msg))))
 
 (defn- start-nasa-hq!
   "Starts up the NASA HQ"
   [hq-atom]
   (glue/start-component!
     hq-atom
-    (fn [in-msg]
-      (n/receive @hq-atom in-msg start-controller!))))
+    (fn [state in-msg]
+      (n/receive state in-msg start-controller!))))
 
 (defn- start-plateau!
   "Starts up the Plateau"
   [plateau-atom]
   (glue/start-component!
     plateau-atom
-    (fn [in-msg]
-      (p/receive @plateau-atom in-msg))))
+    (fn [state in-msg]
+      (p/receive state in-msg))))
 
 (defn- start-displayer!
   "Starts up the displayer component - currently it's a SWING UI"
@@ -64,8 +64,8 @@
   [rover-atom plateau-channel mediator-channel]
   (glue/start-component!
     rover-atom
-    (fn [in-msg]
-      (r/receive @rover-atom in-msg plateau-channel mediator-channel)))
+    (fn [rover-state in-msg]
+      (r/receive rover-state in-msg plateau-channel mediator-channel)))
   (glue/send-msg! (u/msg (:in-channel @rover-atom) (ra/tick-msg (:id @rover-atom)))))
 
 

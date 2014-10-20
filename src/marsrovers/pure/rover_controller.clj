@@ -17,9 +17,9 @@
   (u/msg (rover-channel controller) body))
 
 (defn- deploy-rover-msg [controller]
-  (rover-msg
-    controller
-    (r/deploy-rover-msg (rover-position controller) (:in-channel controller))))
+  (let [rover-position (get-in controller [:rover-config :position])
+        msg-body (r/deploy-rover-msg rover-position (:in-channel controller))]
+    (rover-msg controller msg-body)))
 
 (defn- rover-action-msg [controller]
   (rover-msg

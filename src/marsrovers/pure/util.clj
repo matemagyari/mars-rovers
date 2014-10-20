@@ -34,4 +34,12 @@
         (reset! counter 0)
         (apply f args)))))
 
+(defn list2map [a-seq]
+  (let [len (count a-seq)
+        a-cycle (cycle a-seq)
+        shifted (drop 1 a-cycle)
+        the-keys (->> a-cycle (take-nth 2) (take len))
+        the-vals (->> shifted (take-nth 2) (take len))]
+    (zipmap the-keys the-vals)))
+
 

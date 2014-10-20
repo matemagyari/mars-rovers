@@ -9,7 +9,9 @@
             [marsrovers.pure.api.rover-controller-api :as c]
             ))
 
-(defn change-position [position action]
+;; -----------------  private functions ------------------------
+
+(defn- change-position [position action]
   {:pre [(u/valid-action? action) (some? position)]}
   (condp = action
     :left (update-in position [:facing] move/turn-left)
@@ -25,13 +27,15 @@
 (defn- rover-log! [rover & text]
   (u/log! "Rover " (:id rover) ": " text))
 
-(defn- position-msg [rover]
+(defn- position-msg-body [rover]
   (r/position-msg (:id rover) (:position rover) (:in-channel rover)))
 
-(defn self-poison-msg [rover]
+(defn- self-poison-msg [rover]
   (u/msg
     (:in-channel rover)
     (c/posion-pill-msg)))
+
+;; -----------------  public functions ------------------------
 
 ;;implement different states of the rover with defmulti
 (defmulti receive (fn [rover in-msg plateau-channel mediator-channel] (:state rover)))
@@ -70,13 +74,14 @@
                                 :controller-channel (:controller-channel in-msg))]
                     {:state rover
                      :msgs [(u/msg
-                              plateau-channel (position-msg rover))]})
+                              plateau-channel (position-msg-body rover))]})
 
     :rover-action (let [delay (if (u/in? (:action in-msg) :left :right)
                                 (get-in rover [:config :speed :turning-speed])
                                 (get-in rover [:config :speed :movement-speed]))]
                     {:state (assoc rover
                               :last-action (:action in-msg)
+                              :action-count (-> rover :action-count inc)
                               :state :moving)
                      :msgs [(u/msg
                               (:in-channel rover)
@@ -87,7 +92,7 @@
                            rover (assoc rover :position new-position)]
                        {:state rover
                         :msgs [(u/msg
-                                 plateau-channel (position-msg rover))]})
+                                 plateau-channel (position-msg-body rover))]})
 
     :collision (do
                  ;(rover-log! rover "Mars rover has broken down")
@@ -98,17 +103,16 @@
                 ;(rover-log! rover "Mars rover got lost")
                 {:state rover
                  :msgs [(u/msg
-                          (:controller-channel rover) (position-msg rover))
+                          (:controller-channel rover) (position-msg-body rover))
                         (self-poison-msg rover)]})
 
-    :ack (do
-           (condp = (:state rover)
-             :registered {:state (assoc rover :state :deployed)
-                          :msgs [(u/msg
-                                   (:controller-channel rover) (c/rover-deployed-msg))]}
-             {:state (assoc rover :state :ready)
-              :msgs [(u/msg
-                       (:controller-channel rover) (position-msg rover))]}))
+    :ack (condp = (:state rover)
+           :registered {:state (assoc rover :state :deployed)
+                        :msgs [(u/msg
+                                 (:controller-channel rover) (c/rover-deployed-msg))]}
+           {:state (assoc rover :state :ready)
+            :msgs [(u/msg
+                     (:controller-channel rover) (position-msg-body rover))]})
 
     :poison-pill (do
                    (rover-log! rover "I'm dead!")
@@ -121,11 +125,21 @@
 (defn rover-position [x y facing]
   {:x x :y y :facing facing})
 
-(defn rover [id config channel]
-  {:pre [(some? (get-in config [:speed :turning-speed]))]}
+
+(defn rover-config [position actions]
+  {:pre [(some? position) (some? actions)]}
+  {:position position
+   :actions actions
+   :speed {:movement-speed 0
+           :turning-speed 0}})
+
+(defn rover [id config in-channel]
+  {:pre [(some? (get-in config [:speed :turning-speed]))
+         (every? some? [id config in-channel])]}
   {:id id
    :position nil
    :config config
    :last-action nil
+   :action-count 0
    :state :registration
-   :in-channel channel})
+   :in-channel in-channel})

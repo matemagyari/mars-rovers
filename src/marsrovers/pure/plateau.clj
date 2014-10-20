@@ -38,6 +38,8 @@
 ;; -----------------  public functions ------------------------
 
 (defn receive [plateau in-msg]
+  (when (= 0 (mod (:rover-action-counter plateau) 10000))
+    (println (str (new java.util.Date) " Action number " (:rover-action-counter plateau))))
   (condp = (:type in-msg)
 
     :position (let [rover-id (:rover-id in-msg)
@@ -45,7 +47,7 @@
                     rover-position (:rover-position in-msg)
                     plateau (update-in plateau [:rover-positions]
                               conj [rover-id in-msg])]
-                {:state plateau
+                {:state (update-in plateau [:rover-action-counter] inc)
                  :msgs (let [view-msg (plateau-view-msg plateau)
                              coll-msgs (collisions-msgs plateau rover-id rover-position)]
                          (cond
@@ -58,7 +60,9 @@
     {:state plateau}))
 
 (defn plateau [config in-channel displayer-channel]
+  {:pre [(every? some? [in-channel displayer-channel])]}
   {:rover-positions {}
    :config config
+   :rover-action-counter 0
    :in-channel in-channel
    :displayer-channel displayer-channel})

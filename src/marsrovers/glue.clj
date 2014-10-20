@@ -21,23 +21,30 @@
   (when msgs
     (doseq [msg msgs] (send-msg! msg))))
 
-;; -----------------  private functions ------------------------
+;; -----------------  public functions ------------------------
 
 (defn chan
   "Creates a channel. The rest of the applicatio doesn't have to know that it is a core.async channel."
   ([] (a/chan 1000))
   ([buffer] (a/chan buffer)))
 
+(defn close-channel! [chan]
+  (a/close! chan))
+
 (defn start-component!
   "Starts up a component. A component is composed of:
    entity-atom - the atom holding the value of the component
    msg-processing-fn - a function describing the component's behaviour"
   [entity-atom msg-processing-fn]
-  (a/go-loop []
-    (when-let [in-msg (a/<! (:in-channel @entity-atom))]
-      (let [result (msg-processing-fn in-msg)]
-        (process-result! entity-atom result)))
-    (recur)))
+  (let [in-channel (:in-channel @entity-atom)
+        go-chan (a/go-loop []
+                  (if-let [in-msg (a/<! in-channel)]
+                    (let [result (msg-processing-fn in-msg)]
+                      (process-result! entity-atom result)
+                      (recur))
+                    (println "Channel closed")))]
+    ;(println "Component started up")
+    ))
 
 
 (defn start-simple-component!
@@ -46,9 +53,11 @@
    msg-processing-fn - a function describing the component's behaviour"
   [in-channel msg-processing-fn!]
   (a/go-loop []
-    (when-let [in-msg (a/<! in-channel)]
-      (msg-processing-fn! in-msg))
-    (recur)))
+    (if-let [in-msg (a/<! in-channel)]
+      (do
+        (msg-processing-fn! in-msg)
+        (recur))
+      (println "Channel closed"))))
 
 (defn send-msg! [{:keys [body target delay] :as msg}]
   "Sends a message

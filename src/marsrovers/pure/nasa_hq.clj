@@ -20,9 +20,7 @@
   ;(u/log! "NASA HQ received msg " in-msg)
   (condp = (:type in-msg)
 
-    :disaster (do
-                (u/log! "Disaster happened")
-                {:state (assoc hq :disaster true)})
+    :disaster {:state (assoc hq :disaster true)}
 
     :register-rover (let [controller (create-controller hq in-msg)
                           msgs [(u/msg (:rover-channel in-msg) (hq/rover-registered-msg))
@@ -34,8 +32,7 @@
       (u/log! "Unknown msg in Nasa HQ " in-msg)
       {:state hq})))
 
-(defn nasa-hq [expedition-config in-channel]
+(defn nasa-hq [in-channel]
+  {:pre [(some? in-channel)]}
   {:disaster false
-   :in-channel in-channel
-   :expedition-config expedition-config
-   :plateau-config (:plateau-config expedition-config)})
+   :in-channel in-channel})

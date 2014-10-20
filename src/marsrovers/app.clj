@@ -42,9 +42,7 @@
   "Starts up the displayer component - currently it's a SWING UI"
   [displayer-channel plateau-config dim-screen]
   (let [repaint! (d/repaint-fn [(:x plateau-config) (:y plateau-config)] dim-screen)
-        sampler-repaint! (u/sampler-filter repaint! 10000)
-        ;simple-logger! (u/sampler-filter #() 1000)
-        do-nothing (fn [& args] nil)]
+        sampler-repaint! (u/sampler-filter repaint! 100)]
     (glue/start-simple-component! displayer-channel sampler-repaint!)))
 
 
@@ -56,7 +54,7 @@
         plateau-atom (atom
                        (p/plateau plateau-config plateau-channel displayer-channel))
         nasa-hq-atom (atom
-                       (n/nasa-hq expedition-config nasa-hq-channel))]
+                       (n/nasa-hq nasa-hq-channel))]
     (start-nasa-hq! nasa-hq-atom)
     (start-plateau! plateau-atom)
     (start-displayer! displayer-channel plateau-config dim-screen)))
@@ -79,6 +77,6 @@
                         (r/rover i (nth rover-configs i) (glue/chan))))
         rovers-monitor-watch (monitor/rovers-monitor)]
     (doseq [rover-atom rover-atoms]
-      (add-watch rover-atom :all-rovers rovers-monitor-watch)
+      ;(add-watch rover-atom :all-rovers rovers-monitor-watch)
       (start-rover! rover-atom plateau-channel mediator-channel))))
 

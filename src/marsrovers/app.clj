@@ -17,10 +17,7 @@
 (defn- start-controller!
   "Starts up a mars rover controller"
   [controller-init-state]
-  (glue/start-component!
-    controller-init-state
-    (fn [state in-msg]
-      (c/receive state in-msg))))
+  (glue/start-component! controller-init-state c/receive))
 
 (defn- start-nasa-hq!
   "Starts up the NASA HQ"
@@ -33,10 +30,7 @@
 (defn- start-plateau!
   "Starts up the Plateau"
   [plateau-init-state]
-  (glue/start-component!
-    plateau-init-state
-    (fn [state in-msg]
-      (p/receive state in-msg))))
+  (glue/start-component! plateau-init-state p/receive))
 
 (defn- start-displayer!
   "Starts up the displayer component - currently it's a SWING UI"

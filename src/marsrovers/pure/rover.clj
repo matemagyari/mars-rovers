@@ -126,12 +126,11 @@
   {:x x :y y :facing facing})
 
 
-(defn rover-config [position actions]
+(defn rover-config [position actions speed]
   {:pre [(some? position) (some? actions)]}
   {:position position
    :actions actions
-   :speed {:movement-speed 0
-           :turning-speed 0}})
+   :speed speed})
 
 (defn rover [id config in-channel]
   {:pre [(some? (get-in config [:speed :turning-speed]))

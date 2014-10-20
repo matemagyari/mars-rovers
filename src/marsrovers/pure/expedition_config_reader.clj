@@ -19,7 +19,8 @@
         facing (rand-nth [:n :w :s :e])]
     (r/rover-config
       (r/rover-position x y facing)
-      (lot-of-actions action-number))))
+      (lot-of-actions action-number)
+      {:movement-speed 10 :turning-speed 10})))
 
 (defn- rand-rover-configs [n action-number plateau-config]
   (->> #(rand-rover-config plateau-config action-number)
@@ -34,6 +35,6 @@
   [input-pars]
   (let [plateau-config {:x 300 :y 300}
         rover-number (get input-pars :rover-number 10)
-        action-number (get input-pars :action-number 9999)]
+        action-number (get input-pars :action-number 999999)]
     {:plateau-config plateau-config
      :rover-configs (rand-rover-configs rover-number action-number plateau-config)}))

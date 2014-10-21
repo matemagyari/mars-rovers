@@ -34,12 +34,12 @@
   "Return the config for the expedition."
   [input-config]
   (let [default-config {:rover-number 100
-                              :action-number 9999
-                              :speed {:movement-speed 0
-                                      :turning-speed 0}
-                              :plateau-config {:x 300
-                                               :y 300}
-                              :dim-screen [600 600]}
+                        :action-number 9999
+                        :speed {:movement-speed 0
+                                :turning-speed 0}
+                        :plateau-config {:x 300
+                                         :y 300}
+                        :dim-screen [600 600]}
         result-config (merge default-config input-config)
         plateau-config {:x 300 :y 300}
         rover-number (get input-config :rover-number 10)

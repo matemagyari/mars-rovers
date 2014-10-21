@@ -26,5 +26,5 @@
         nasa-hq-channel)
       (println "Rovers started up"))))
 
-(-main ":rover-number 100")
+;(-main ":rover-number 100")
 

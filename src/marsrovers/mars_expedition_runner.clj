@@ -7,18 +7,23 @@
             [marsrovers.glue :as glue]
             [marsrovers.pure.expedition-config-reader :as ecr]))
 
-(defn -main [& args]
+(defn- args->config
+  "Transforms the command line input parameters to a config map"
+  [args]
+  (if args (read-string (str "{" (first args) "}")) {}))
+
+(defn run-it
+  "Runs the show"
+  [config]
   (let [displayer-channel (glue/chan)
         plateau-channel (glue/chan)
         nasa-hq-channel (glue/chan)
         time-stamp (System/currentTimeMillis)
-        input-pars (if args (read-string (str "{" (first args) "}")) {})
-        expedition-config (ecr/expedition-config input-pars)
-        dim-screen [600 600]]
+        expedition-config (ecr/expedition-config config)]
     (do
       (println (str (- (System/currentTimeMillis) time-stamp) " ms has elapsed"))
       (println "Word starting...")
-      (app/start-world! expedition-config plateau-channel nasa-hq-channel displayer-channel dim-screen)
+      (app/start-world! expedition-config plateau-channel nasa-hq-channel displayer-channel)
       (println "Word started")
       (app/start-rovers!
         (:rover-configs expedition-config)
@@ -26,5 +31,9 @@
         nasa-hq-channel)
       (println "Rovers started up"))))
 
-;(-main ":rover-number 100")
+(defn -main [& args]
+  (-> args args->config run-it))
+
+(-main ":rover-number 100")
+
 

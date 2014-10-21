@@ -43,13 +43,13 @@
 ;; -----------------  public functions ------------------------
 (defn start-world!
   "Starts up the world the rovers will roam"
-  [expedition-config plateau-channel nasa-hq-channel displayer-channel dim-screen]
+  [expedition-config plateau-channel nasa-hq-channel displayer-channel]
   (let [plateau-config (:plateau-config expedition-config)
         plateau-init-state (p/plateau plateau-config plateau-channel displayer-channel)
         nasa-hq-init-state (n/nasa-hq nasa-hq-channel)]
     (start-nasa-hq! nasa-hq-init-state)
     (start-plateau! plateau-init-state)
-    (start-displayer! displayer-channel plateau-config dim-screen)))
+    (start-displayer! displayer-channel plateau-config (:dim-screen expedition-config))))
 
 (defn start-rover!
   "Starts up a single rover"
@@ -65,7 +65,7 @@
   "Starts up a bunch of rovers"
   [rover-configs plateau-channel mediator-channel]
   (let [rovers (for [i (range (count rover-configs))]
-                      (r/rover i (nth rover-configs i) (glue/chan)))
+                 (r/rover i (nth rover-configs i) (glue/chan)))
         rovers-monitor-watch (monitor/rovers-monitor)]
     (doseq [rover rovers]
       ;(add-watch rover-atom :all-rovers rovers-monitor-watch)

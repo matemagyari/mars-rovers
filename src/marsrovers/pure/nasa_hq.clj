@@ -1,6 +1,7 @@
 (ns
   ^{:author mate.magyari
-    :doc "Pure functions describing the behaviour of the NASA HQ component"}
+    :doc "Pure functions describing the behaviour of the NASA HQ component.
+    When a Rover registers at the HQ, it replies with an acknowledgment and creates a Controller for the Rover."}
   marsrovers.pure.nasa-hq
   (:require [marsrovers.pure.api.nasa-hq-api :as hq]
             [marsrovers.pure.rover-controller :as c]

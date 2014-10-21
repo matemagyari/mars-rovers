@@ -32,9 +32,18 @@
 
 (defn expedition-config
   "Return the config for the expedition."
-  [input-pars]
-  (let [plateau-config {:x 300 :y 300}
-        rover-number (get input-pars :rover-number 10)
-        action-number (get input-pars :action-number 999999)]
+  [input-config]
+  (let [default-config {:rover-number 100
+                              :action-number 9999
+                              :speed {:movement-speed 0
+                                      :turning-speed 0}
+                              :plateau-config {:x 300
+                                               :y 300}
+                              :dim-screen [600 600]}
+        result-config (merge default-config input-config)
+        plateau-config {:x 300 :y 300}
+        rover-number (get input-config :rover-number 10)
+        action-number (get input-config :action-number 999999)]
     {:plateau-config plateau-config
-     :rover-configs (rand-rover-configs rover-number action-number plateau-config)}))
+     :rover-configs (rand-rover-configs rover-number action-number plateau-config)
+     :dim-screen (:dim-screen result-config)}))

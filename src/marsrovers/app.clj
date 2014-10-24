@@ -32,15 +32,16 @@
   [plateau-init-state]
   (glue/start-component! plateau-init-state p/receive))
 
-(defn- start-displayer!
+
+;; -----------------  public functions ------------------------
+(defn start-displayer!
   "Starts up the displayer component - currently it's a SWING UI"
   [displayer-channel plateau-config dim-screen]
   (let [repaint! (d/repaint-fn [(:x plateau-config) (:y plateau-config)] dim-screen)
+        ;do-nothing (fn [msg] nil)
         sampler-repaint! (u/sampler-filter repaint! 100)]
     (glue/start-simple-component! displayer-channel sampler-repaint!)))
 
-
-;; -----------------  public functions ------------------------
 (defn start-world!
   "Starts up the world the rovers will roam"
   [expedition-config plateau-channel nasa-hq-channel displayer-channel]
@@ -48,8 +49,7 @@
         plateau-init-state (p/plateau plateau-config plateau-channel displayer-channel)
         nasa-hq-init-state (n/nasa-hq nasa-hq-channel)]
     (start-nasa-hq! nasa-hq-init-state)
-    (start-plateau! plateau-init-state)
-    (start-displayer! displayer-channel plateau-config (:dim-screen expedition-config))))
+    (start-plateau! plateau-init-state)))
 
 (defn start-rover!
   "Starts up a single rover"

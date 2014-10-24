@@ -12,7 +12,7 @@
   [args]
   (if args (read-string (str "{" (first args) "}")) {}))
 
-(defn run-it
+(defn run-the-show!
   "Runs the show"
   [config]
   (let [displayer-channel (glue/chan)
@@ -24,6 +24,7 @@
       (println (str (- (System/currentTimeMillis) time-stamp) " ms has elapsed"))
       (println "Word starting...")
       (app/start-world! expedition-config plateau-channel nasa-hq-channel displayer-channel)
+      (app/start-displayer! displayer-channel (:plateau-config expedition-config) (:dim-screen expedition-config))
       (println "Word started")
       (app/start-rovers!
         (:rover-configs expedition-config)
@@ -32,8 +33,8 @@
       (println "Rovers started up"))))
 
 (defn -main [& args]
-  (-> args args->config run-it))
+  (-> args args->config run-the-show!))
 
-(-main ":rover-number 100")
+;(-main ":rover-number 1000 :action-number 99999")
 
 

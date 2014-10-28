@@ -35,6 +35,6 @@
 (defn -main [& args]
   (-> args args->config run-the-show!))
 
-;(-main ":rover-number 1000 :action-number 99999")
+;(-main ":rover-number 100 :action-number 99999")
 
 
